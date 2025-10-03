@@ -8,9 +8,9 @@ import org.example.model.WatermarkConfig;
 import java.io.File;
 import java.io.IOException;
 
+// 在 ConfigService 中确保模板功能完整实现
 public class ConfigService {
     private static final String TEMPLATE_DIR = "templates/";
-    private static final String LAST_CONFIG_FILE = "templates/last_config.json";
 
     public ConfigService() {
         // 确保模板目录存在
@@ -20,6 +20,7 @@ public class ConfigService {
         }
     }
 
+    // 确保 ConfigService 能正确处理所有字段
     public void saveTemplate(WatermarkConfig config, String templateName) {
         try {
             ObjectMapper mapper = new ObjectMapper();
@@ -40,7 +41,7 @@ public class ConfigService {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return new WatermarkConfig(); // 返回默认配置
+        return null;
     }
 
     public void saveLastConfiguration(WatermarkConfig config) {

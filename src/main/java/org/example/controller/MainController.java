@@ -277,11 +277,28 @@ public class MainController {
 
 
     private void loadTemplateList() {
-        // 这里应该从文件系统加载模板列表
-        templateComboBox.setItems(FXCollections.observableArrayList(
-            "默认模板", "公司水印", "个人水印"
-        ));
-        templateComboBox.setValue("默认模板");
+        File templateDir = new File("templates");
+        if (!templateDir.exists()) {
+            templateDir.mkdirs();
+            templateComboBox.setItems(FXCollections.observableArrayList());
+            return;
+        }
+
+        File[] templateFiles = templateDir.listFiles((dir, name) -> name.endsWith(".json"));
+        List<String> templateNames = new ArrayList<>();
+
+        if (templateFiles != null) {
+            for (File file : templateFiles) {
+                String name = file.getName();
+                // 移除 .json 扩展名
+                templateNames.add(name.substring(0, name.length() - 5));
+            }
+        }
+
+        templateComboBox.setItems(FXCollections.observableArrayList(templateNames));
+        if (!templateNames.isEmpty()) {
+            templateComboBox.setValue(templateNames.get(0));
+        }
     }
     
     private void importSingleImage() {
@@ -404,6 +421,7 @@ public class MainController {
         showAlert("导出完成", "成功导出 " + successCount + " 张图片");
     }
 
+
     private boolean isOutputFolderSameAsSource(String outputFolder) {
         // 检查输出文件夹是否与任何源文件夹相同
         for (FileItem item : imageList) {
@@ -489,39 +507,49 @@ public class MainController {
         currentConfig.setOffsetY(0);
         updateWatermarkPreview();
     }
-    
+
     private void saveCurrentTemplate() {
         String templateName = templateNameField.getText();
         if (templateName.isEmpty()) {
             showAlert("提示", "请输入模板名称");
             return;
         }
-        
+
+        // 保存当前水印配置为模板
         configService.saveTemplate(getCurrentWatermarkConfig(), templateName);
         loadTemplateList(); // 重新加载模板列表
         showAlert("提示", "模板保存成功");
     }
-    
+
     private void loadSelectedTemplate() {
         String selectedTemplate = templateComboBox.getValue();
-        if (selectedTemplate != null) {
+        if (selectedTemplate != null && !selectedTemplate.isEmpty()) {
             WatermarkConfig config = configService.loadTemplate(selectedTemplate);
             if (config != null) {
                 applyWatermarkConfig(config);
                 showAlert("提示", "模板加载成功");
+            } else {
+                showAlert("错误", "无法加载模板: " + selectedTemplate);
             }
         }
     }
-    
+
     private void deleteSelectedTemplate() {
         String selectedTemplate = templateComboBox.getValue();
-        if (selectedTemplate != null) {
-            // 这里应该实现实际的模板删除逻辑
-            System.out.println("删除模板: " + selectedTemplate);
-            showAlert("提示", "模板删除成功");
+        if (selectedTemplate != null && !selectedTemplate.isEmpty()) {
+            // 删除模板文件
+            File templateFile = new File("templates/" + selectedTemplate + ".json");
+            if (templateFile.exists()) {
+                if (templateFile.delete()) {
+                    loadTemplateList(); // 重新加载模板列表
+                    showAlert("提示", "模板删除成功");
+                } else {
+                    showAlert("错误", "无法删除模板");
+                }
+            }
         }
     }
-    
+
     private void applyWatermarkConfig(WatermarkConfig config) {
         watermarkTextField.setText(config.getText());
         fontComboBox.setValue(config.getFontName());
@@ -533,6 +561,14 @@ public class MainController {
         shadowCheckBox.setSelected(config.isShadowEnabled());
         strokeCheckBox.setSelected(config.isStrokeEnabled());
         rotationSlider.setValue(config.getRotation());
+
+        // 添加位置信息的设置
+        currentConfig.setPosition(config.getPosition());
+        currentConfig.setOffsetX(config.getOffsetX());
+        currentConfig.setOffsetY(config.getOffsetY());
+
+        // 触发预览更新
+        updateWatermarkPreview();
     }
     
     public void loadLastConfiguration() {

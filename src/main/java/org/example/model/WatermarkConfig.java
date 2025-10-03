@@ -1,7 +1,11 @@
 // src/main/java/com/watermark/app/model/WatermarkConfig.java
 package org.example.model;
 
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import javafx.scene.paint.Color;
+import org.example.util.ColorDeserializer;
+import org.example.util.ColorSerializer;
 
 public class WatermarkConfig {
     private String text = "水印文字";
@@ -9,6 +13,9 @@ public class WatermarkConfig {
     private int fontSize = 24;
     private boolean bold = false;
     private boolean italic = false;
+
+    @JsonSerialize(using = ColorSerializer.class)
+    @JsonDeserialize(using = ColorDeserializer.class)
     private Color color = Color.BLACK;
     private double opacity = 0.5;
     private WatermarkPosition position = WatermarkPosition.CENTER;
