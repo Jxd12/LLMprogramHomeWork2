@@ -1,0 +1,117 @@
+<!-- src/main/resources/fxml/main.fxml -->
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import javafx.scene.image.*?>
+
+<VBox xmlns="http://javafx.com/javafx/17.0.2-ea" xmlns:fx="http://javafx.com/fxml/1">
+    <MenuBar>
+        <Menu text="文件">
+            <MenuItem text="导入图片" />
+            <MenuItem text="批量导入" />
+            <SeparatorMenuItem />
+            <MenuItem text="导出图片" />
+        </Menu>
+        <Menu text="模板">
+            <MenuItem text="保存模板" />
+            <MenuItem text="加载模板" />
+        </Menu>
+    </MenuBar>
+    
+    <SplitPane dividerPositions="0.2, 0.7" VBox.vgrow="ALWAYS">
+        <!-- 左侧图片列表 -->
+        <VBox>
+            <Label text="图片列表" />
+            <ListView fx:id="imageListView" VBox.vgrow="ALWAYS" />
+        </VBox>
+        
+        <!-- 中间预览区域 -->
+        <StackPane>
+            <ImageView fx:id="previewImageView" fitWidth="600" fitHeight="500" preserveRatio="true" />
+        </StackPane>
+        
+        <!-- 右侧控制面板 -->
+        <TabPane tabClosingPolicy="UNAVAILABLE">
+            <Tab text="文件">
+                <VBox spacing="10" padding="10">
+                    <Button text="导入图片" fx:id="importButton" />
+                    <Button text="批量导入" fx:id="batchImportButton" />
+                    <Separator />
+                    <Label text="导出设置" />
+                    <TextField promptText="输出文件夹" fx:id="outputFolderField" />
+                    <Button text="选择文件夹" fx:id="selectFolderButton" />
+                    <Label text="命名规则:" />
+                    <RadioButton text="保留原文件名" fx:id="keepOriginalNameRadio" />
+                    <RadioButton text="添加前缀" fx:id="addPrefixRadio" />
+                    <TextField promptText="前缀" fx:id="prefixField" />
+                    <RadioButton text="添加后缀" fx:id="addSuffixRadio" />
+                    <TextField promptText="后缀" fx:id="suffixField" />
+                    <Label text="输出格式:" />
+                    <ComboBox fx:id="formatComboBox" />
+                    <Button text="导出图片" fx:id="exportButton" />
+                </VBox>
+            </Tab>
+            
+            <Tab text="水印">
+                <ScrollPane>
+                    <VBox spacing="10" padding="10">
+                        <Label text="文本内容:" />
+                        <TextField fx:id="watermarkTextField" text="水印文字" />
+                        
+                        <Label text="字体设置:" />
+                        <ComboBox fx:id="fontComboBox" />
+                        <HBox spacing="10">
+                            <ComboBox fx:id="fontSizeComboBox" />
+                            <CheckBox text="粗体" fx:id="boldCheckBox" />
+                            <CheckBox text="斜体" fx:id="italicCheckBox" />
+                        </HBox>
+                        
+                        <Label text="颜色和透明度:" />
+                        <ColorPicker fx:id="colorPicker" />
+                        <Slider fx:id="opacitySlider" min="0" max="100" value="50" />
+                        
+                        <Label text="效果:" />
+                        <CheckBox text="阴影" fx:id="shadowCheckBox" />
+                        <CheckBox text="描边" fx:id="strokeCheckBox" />
+                    </VBox>
+                </ScrollPane>
+            </Tab>
+            
+            <Tab text="布局">
+                <VBox spacing="10" padding="10">
+                    <Label text="预设位置:" />
+                    <GridPane hgap="5" vgap="5">
+                        <Button text="↖" GridPane.columnIndex="0" GridPane.rowIndex="0" fx:id="topLeftButton" />
+                        <Button text="↑" GridPane.columnIndex="1" GridPane.rowIndex="0" fx:id="topCenterButton" />
+                        <Button text="↗" GridPane.columnIndex="2" GridPane.rowIndex="0" fx:id="topRightButton" />
+                        <Button text="←" GridPane.columnIndex="0" GridPane.rowIndex="1" fx:id="centerLeftButton" />
+                        <Button text="●" GridPane.columnIndex="1" GridPane.rowIndex="1" fx:id="centerButton" />
+                        <Button text="→" GridPane.columnIndex="2" GridPane.rowIndex="1" fx:id="centerRightButton" />
+                        <Button text="↙" GridPane.columnIndex="0" GridPane.rowIndex="2" fx:id="bottomLeftButton" />
+                        <Button text="↓" GridPane.columnIndex="1" GridPane.rowIndex="2" fx:id="bottomCenterButton" />
+                        <Button text="↘" GridPane.columnIndex="2" GridPane.rowIndex="2" fx:id="bottomRightButton" />
+                    </GridPane>
+                    
+                    <Label text="旋转角度:" />
+                    <Slider fx:id="rotationSlider" min="0" max="360" value="0" />
+                    <TextField fx:id="rotationField" text="0" />
+                </VBox>
+            </Tab>
+            
+            <Tab text="模板">
+                <VBox spacing="10" padding="10">
+                    <Label text="保存模板:" />
+                    <TextField promptText="模板名称" fx:id="templateNameField" />
+                    <Button text="保存当前设置为模板" fx:id="saveTemplateButton" />
+                    
+                    <Label text="加载模板:" />
+                    <ComboBox fx:id="templateComboBox" />
+                    <Button text="加载选中模板" fx:id="loadTemplateButton" />
+                    <Button text="删除选中模板" fx:id="deleteTemplateButton" />
+                </VBox>
+            </Tab>
+        </TabPane>
+    </SplitPane>
+</VBox>
