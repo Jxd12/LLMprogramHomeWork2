@@ -303,19 +303,36 @@ public class MainController {
             }
         }
     }
-    
+
     private void importMultipleImages() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("选择图片文件夹");
-        
+
         File selectedDirectory = directoryChooser.showDialog(batchImportButton.getScene().getWindow());
         if (selectedDirectory != null) {
-            // 这里应该遍历文件夹中的所有图片文件
-            // 为简化实现，这里只是示例
-            System.out.println("批量导入功能待实现: " + selectedDirectory.getAbsolutePath());
+            // 遍历文件夹中的所有图片文件
+            File[] files = selectedDirectory.listFiles((dir, name) -> {
+                String lowerName = name.toLowerCase();
+                return lowerName.endsWith(".jpg") || lowerName.endsWith(".jpeg") ||
+                        lowerName.endsWith(".png") || lowerName.endsWith(".bmp") ||
+                        lowerName.endsWith(".tiff") || lowerName.endsWith(".tif");
+            });
+
+            if (files != null) {
+                for (File file : files) {
+                    imageList.add(new FileItem(file));
+                }
+                // 如果是第一批图片，显示第一张的预览
+                if (imageList.size() > 0 && imageListView.getSelectionModel().getSelectedItem() == null) {
+                    imageListView.getSelectionModel().select(0);
+                    updatePreview(imageList.get(0));
+                }
+                showAlert("提示", "成功导入 " + files.length + " 张图片");
+            }
         }
     }
-    
+
+
     private void selectOutputFolder() {
         DirectoryChooser directoryChooser = new DirectoryChooser();
         directoryChooser.setTitle("选择输出文件夹");
@@ -325,24 +342,29 @@ public class MainController {
             outputFolderField.setText(selectedDirectory.getAbsolutePath());
         }
     }
-    
+
     private void exportImages() {
         if (imageList.isEmpty()) {
             showAlert("提示", "请先导入图片");
             return;
         }
-        
+
         String outputFolder = outputFolderField.getText();
         if (outputFolder.isEmpty()) {
             showAlert("提示", "请选择输出文件夹");
             return;
         }
-        
+
+        File outputDir = new File(outputFolder);
+        if (!outputDir.exists()) {
+            outputDir.mkdirs();
+        }
+
         ExportOptions options = new ExportOptions();
         options.setOutputFolder(outputFolder);
         options.setOutputFormat(formatComboBox.getValue());
         options.setWatermarkConfig(getCurrentWatermarkConfig());
-        
+
         // 设置命名规则
         if (keepOriginalNameRadio.isSelected()) {
             options.setNamingRule("original");
@@ -353,12 +375,44 @@ public class MainController {
             options.setNamingRule("suffix");
             options.setSuffix(suffixField.getText());
         }
-        
-        // 这里应该调用实际的导出逻辑
-        System.out.println("导出图片功能待实现");
-        showAlert("提示", "导出功能已触发，请查看控制台输出");
+
+        // 实现实际的导出逻辑
+        int successCount = 0;
+        for (FileItem item : imageList) {
+            try {
+                // 读取原始图片
+                BufferedImage originalImage = ImageIO.read(item.getFile());
+                // 应用水印
+                BufferedImage watermarkedImage = WatermarkService.addTextWatermark(originalImage, options.getWatermarkConfig());
+                // 生成输出文件名
+                String outputFileName = generateOutputFileName(item.getFile().getName(), options);
+                File outputFile = new File(outputFolder, outputFileName);
+                // 导出图片
+                ImageIO.write(watermarkedImage, options.getOutputFormat().toLowerCase(), outputFile);
+                successCount++;
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+
+        showAlert("导出完成", "成功导出 " + successCount + " 张图片");
     }
-    
+    private String generateOutputFileName(String originalName, ExportOptions options) {
+        String nameWithoutExtension = originalName.substring(0, originalName.lastIndexOf('.'));
+        String extension = options.getOutputFormat().toLowerCase();
+
+        switch (options.getNamingRule()) {
+            case "prefix":
+                return options.getPrefix() + nameWithoutExtension + "." + extension;
+            case "suffix":
+                return nameWithoutExtension + options.getSuffix() + "." + extension;
+            default:
+                return nameWithoutExtension + "." + extension;
+        }
+    }
+
+
+
     private void updateWatermarkPreview() {
         System.out.println("updateWatermarkPreview");
         currentConfig = getCurrentWatermarkConfig();
