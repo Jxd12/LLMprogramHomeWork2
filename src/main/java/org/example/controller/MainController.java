@@ -7,6 +7,8 @@ import javafx.collections.ObservableList;
 import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.control.Button;
+import javafx.scene.control.TextField;
 import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
@@ -20,8 +22,11 @@ import org.example.service.ConfigService;
 import org.example.service.WatermarkService;
 
 import javax.imageio.ImageIO;
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class MainController {
@@ -209,15 +214,32 @@ public class MainController {
         loadTemplateButton.setOnAction(e -> loadSelectedTemplate());
         deleteTemplateButton.setOnAction(e -> deleteSelectedTemplate());
     }
-    
+
+    // 修改 loadSystemFonts 方法以支持中文字体
     private void loadSystemFonts() {
-        // 添加一些常用字体作为示例
-        fontComboBox.setItems(FXCollections.observableArrayList(
-            "Arial", "Times New Roman", "Courier New", "Verdana", "Helvetica"
-        ));
-        fontComboBox.setValue("Arial");
+        // 获取系统所有可用字体
+        String[] fontNames = GraphicsEnvironment.getLocalGraphicsEnvironment().getAvailableFontFamilyNames();
+
+        // 筛选包含中文字体的常用字体
+        List<String> chineseFonts = new ArrayList<>();
+        for (String fontName : fontNames) {
+            if (fontName.contains("Sim") || fontName.contains("宋") || fontName.contains("黑") ||
+                    fontName.contains("楷") || fontName.contains("隶") || fontName.contains("苹") ||
+                    fontName.contains("Microsoft") || fontName.contains("微软雅黑") || fontName.contains("宋体")) {
+                chineseFonts.add(fontName);
+            }
+        }
+
+        // 如果没有找到中文字体，则添加系统默认中文字体
+        if (chineseFonts.isEmpty()) {
+            chineseFonts.addAll(Arrays.asList("SimSun", "SimHei", "Microsoft YaHei", "Arial Unicode MS"));
+        }
+
+        fontComboBox.setItems(FXCollections.observableArrayList(chineseFonts));
+        fontComboBox.setValue(chineseFonts.get(0)); // 默认选择第一个中文字体
     }
-    
+
+
     private void loadTemplateList() {
         // 这里应该从文件系统加载模板列表
         templateComboBox.setItems(FXCollections.observableArrayList(
