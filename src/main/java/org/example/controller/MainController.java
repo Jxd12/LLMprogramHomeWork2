@@ -355,6 +355,12 @@ public class MainController {
             return;
         }
 
+        // 检查输出文件夹是否与原文件夹相同
+        if (isOutputFolderSameAsSource(outputFolder)) {
+            showAlert("错误", "输出文件夹不能与原文件夹相同，以防止覆盖原始文件");
+            return;
+        }
+
         File outputDir = new File(outputFolder);
         if (!outputDir.exists()) {
             outputDir.mkdirs();
@@ -397,6 +403,23 @@ public class MainController {
 
         showAlert("导出完成", "成功导出 " + successCount + " 张图片");
     }
+
+    private boolean isOutputFolderSameAsSource(String outputFolder) {
+        // 检查输出文件夹是否与任何源文件夹相同
+        for (FileItem item : imageList) {
+            try {
+                File sourceFolder = item.getFile().getParentFile();
+                File targetFolder = new File(outputFolder);
+                if (sourceFolder.getCanonicalPath().equals(targetFolder.getCanonicalPath())) {
+                    return true;
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return false;
+    }
+
     private String generateOutputFileName(String originalName, ExportOptions options) {
         String nameWithoutExtension = originalName.substring(0, originalName.lastIndexOf('.'));
         String extension = options.getOutputFormat().toLowerCase();
