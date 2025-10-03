@@ -16,6 +16,10 @@ public class WatermarkConfig {
     private boolean shadowEnabled = false;
     private boolean strokeEnabled = false;
 
+    // 在 WatermarkConfig 类中添加
+    private double offsetX = 0.0;
+    private double offsetY = 0.0;
+
     // 构造函数
     public WatermarkConfig() {}
 
@@ -42,7 +46,7 @@ public class WatermarkConfig {
     public void setOpacity(double opacity) { this.opacity = opacity; }
 
     public WatermarkPosition getPosition() { return position; }
-    public void setPosition(WatermarkPosition position) { this.position = position; }
+    public void setPosition(WatermarkPosition position) { this.position = position;}
 
     public double getRotation() { return rotation; }
     public void setRotation(double rotation) { this.rotation = rotation; }
@@ -52,4 +56,19 @@ public class WatermarkConfig {
 
     public boolean isStrokeEnabled() { return strokeEnabled; }
     public void setStrokeEnabled(boolean strokeEnabled) { this.strokeEnabled = strokeEnabled; }
+    public double getOffsetX() {
+        return offsetX;
+    }
+
+    public void setOffsetX(double offsetX) {
+        this.offsetX = offsetX;
+    }
+
+    public double getOffsetY() {
+        return offsetY;
+    }
+
+    public void setOffsetY(double offsetY) {
+        this.offsetY = offsetY;
+    }
 }

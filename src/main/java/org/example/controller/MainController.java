@@ -118,6 +118,10 @@ public class MainController {
     private Button loadTemplateButton;
     @FXML
     private Button deleteTemplateButton;
+
+    private double mousePressX;
+    private double mousePressY;
+    private boolean isDragging = false;
     
     // 数据模型
     private ObservableList<FileItem> imageList = FXCollections.observableArrayList();
@@ -142,6 +146,7 @@ public class MainController {
                     }
                 }
         );
+        setupPreviewMouseEvents();
     }
     
     private void setupUIComponents() {
@@ -213,6 +218,37 @@ public class MainController {
         saveTemplateButton.setOnAction(e -> saveCurrentTemplate());
         loadTemplateButton.setOnAction(e -> loadSelectedTemplate());
         deleteTemplateButton.setOnAction(e -> deleteSelectedTemplate());
+    }
+    // 在 initialize 方法中添加预览区域鼠标事件监听
+    private void setupPreviewMouseEvents() {
+        previewImageView.setOnMousePressed(event -> {
+            mousePressX = event.getX();
+            mousePressY = event.getY();
+            isDragging = true;
+        });
+
+        previewImageView.setOnMouseReleased(event -> {
+            isDragging = false;
+        });
+
+        previewImageView.setOnMouseDragged(event -> {
+            if (isDragging) {
+                double deltaX = event.getX() - mousePressX;
+                double deltaY = event.getY() - mousePressY;
+                updateWatermarkPosition(deltaX, deltaY);
+                mousePressX = event.getX();
+                mousePressY = event.getY();
+            }
+        });
+    }
+
+    private void updateWatermarkPosition(double deltaX, double deltaY) {
+        // 更新水印坐标偏移量
+        currentConfig.setOffsetX(currentConfig.getOffsetX() + deltaX);
+        currentConfig.setOffsetY(currentConfig.getOffsetY() + deltaY);
+
+        // 触发预览更新
+        updateWatermarkPreview();
     }
 
     // 修改 loadSystemFonts 方法以支持中文字体
@@ -324,6 +360,7 @@ public class MainController {
     }
     
     private void updateWatermarkPreview() {
+        System.out.println("updateWatermarkPreview");
         currentConfig = getCurrentWatermarkConfig();
         FileItem selectedItem = imageListView.getSelectionModel().getSelectedItem();
         if (selectedItem != null) {
@@ -343,11 +380,17 @@ public class MainController {
         config.setShadowEnabled(shadowCheckBox.isSelected());
         config.setStrokeEnabled(strokeCheckBox.isSelected());
         config.setRotation(rotationSlider.getValue());
+        // 添加缺失的位置和偏移量设置
+        config.setPosition(currentConfig.getPosition());
+        config.setOffsetX(currentConfig.getOffsetX());
+        config.setOffsetY(currentConfig.getOffsetY());
+
         return config;
     }
     
     private void updatePreview(FileItem fileItem) {
         try {
+            System.out.println("updatePreview");
             // 加载原始图片
             BufferedImage originalImage = ImageIO.read(fileItem.getFile());
             // 应用水印配置
@@ -364,6 +407,9 @@ public class MainController {
     
     private void setPosition(WatermarkPosition position) {
         currentConfig.setPosition(position);
+        // 重置偏移量，确保预设位置准确生效
+        currentConfig.setOffsetX(0);
+        currentConfig.setOffsetY(0);
         updateWatermarkPreview();
     }
     
