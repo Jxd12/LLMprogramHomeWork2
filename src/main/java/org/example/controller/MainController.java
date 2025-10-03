@@ -6,6 +6,7 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
+import javafx.scene.image.Image;
 import javafx.scene.image.ImageView;
 import javafx.scene.paint.Color;
 import javafx.stage.DirectoryChooser;
@@ -124,6 +125,14 @@ public class MainController {
         loadSystemFonts();
         // 加载模板列表
         loadTemplateList();
+        // 在 initialize 方法中添加列表选择监听器
+        imageListView.getSelectionModel().selectedItemProperty().addListener(
+                (observable, oldValue, newValue) -> {
+                    if (newValue != null) {
+                        updatePreview(newValue);
+                    }
+                }
+        );
     }
     
     private void setupUIComponents() {
@@ -312,9 +321,15 @@ public class MainController {
     }
     
     private void updatePreview(FileItem fileItem) {
-        // 这里应该实现实际的预览更新逻辑
-        // 为简化实现，这里只是示例
-        System.out.println("更新预览: " + fileItem.getFileName());
+        try {
+            // 从文件创建 Image 对象
+            Image image = new Image(fileItem.getFile().toURI().toString());
+            previewImageView.setImage(image);
+        } catch (Exception e) {
+            e.printStackTrace();
+            // 显示错误图片或提示
+            previewImageView.setImage(null);
+        }
     }
     
     private void setPosition(WatermarkPosition position) {
