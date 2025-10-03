@@ -4,6 +4,7 @@ package org.example.controller;
 import javafx.collections.FXCollections;
 
 import javafx.collections.ObservableList;
+import javafx.embed.swing.SwingFXUtils;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.image.Image;
@@ -16,7 +17,10 @@ import org.example.model.FileItem;
 import org.example.model.WatermarkConfig;
 import org.example.model.WatermarkPosition;
 import org.example.service.ConfigService;
+import org.example.service.WatermarkService;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.util.List;
 
@@ -322,9 +326,13 @@ public class MainController {
     
     private void updatePreview(FileItem fileItem) {
         try {
-            // 从文件创建 Image 对象
-            Image image = new Image(fileItem.getFile().toURI().toString());
-            previewImageView.setImage(image);
+            // 加载原始图片
+            BufferedImage originalImage = ImageIO.read(fileItem.getFile());
+            // 应用水印配置
+            BufferedImage watermarkedImage = WatermarkService.addTextWatermark(originalImage, currentConfig);
+            // 转换为 JavaFX Image 并显示
+            Image fxImage = SwingFXUtils.toFXImage(watermarkedImage, null);
+            previewImageView.setImage(fxImage);
         } catch (Exception e) {
             e.printStackTrace();
             // 显示错误图片或提示
